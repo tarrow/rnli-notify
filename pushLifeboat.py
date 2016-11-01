@@ -1,4 +1,4 @@
-import requests,json,os
+import requests,json,os,time
 
 '''
 Make a pushbullet notification
@@ -16,23 +16,24 @@ def makeSet(listInput):
     for entry in listInput:
         listOutput.append(json.dumps(entry, sort_keys=True))
     return set(listOutput)
+while True:
+    try:
+        with open('oldShouts.json') as oldShoutsFile:
+            oldShouts=makeSet(json.load(oldShoutsFile))
+    except (OSError, ValueError):
+        oldShouts = set()
+        pass
+    rawNewShouts = requests.get("http://services.rnli.org/api/launches?numberOfShouts=10").json()
+    newShouts = makeSet(rawNewShouts)
+    differentShouts=newShouts-oldShouts
 
-try:
-    with open('oldShouts.json') as oldShoutsFile:
-        oldShouts=makeSet(json.load(oldShoutsFile))
-except (OSError, ValueError):
-    oldShouts = set()
-    pass
-rawNewShouts = requests.get("http://services.rnli.org/api/launches?numberOfShouts=10").json()
-newShouts = makeSet(rawNewShouts)
-differentShouts=newShouts-oldShouts
+    for shoutString in differentShouts:
+        shout = json.loads(shoutString)
+        pushNotification(shout['launchDate'])
 
-for shoutString in differentShouts:
-    shout = json.loads(shoutString)
-    pushNotification(shout['launchDate'])
-
-with open('oldShouts.json', 'w') as oldShoutsFile:
-    newShoutsList=[]
-    for entry in newShouts:
-        newShoutsList.append(json.loads(entry))
-    json.dump(newShoutsList, oldShoutsFile)
+    with open('oldShouts.json', 'w') as oldShoutsFile:
+        newShoutsList=[]
+        for entry in newShouts:
+            newShoutsList.append(json.loads(entry))
+        json.dump(newShoutsList, oldShoutsFile)
+    time.sleep(600)
