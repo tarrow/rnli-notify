@@ -12,14 +12,14 @@ Make a pushbullet notification
 '''
 def pushNotification(time):
     payload = {
-        'type':'push',
+        'type':'note',
         'channel_tag':'foweylifeboatunofficial',
         'title':'Lifeboat Launch',
-        'body':'Lifeboat Launched At '+time}
-        'dissmissable': False,
+        'body':'Lifeboat Launched At '+time
+        }
     headers = {'Access-Token':os.environ['PB_KEY']}
     r=requests.post("https://api.pushbullet.com/v2/pushes", data=payload, headers=headers)
-
+    print(r.text)
 '''
 Return set of values of a list of json object
 '''
