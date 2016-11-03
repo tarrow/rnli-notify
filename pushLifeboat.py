@@ -1,10 +1,22 @@
 import requests,json,os,time
 
 '''
+Test launch station and push notification if matches supplied shortName
+'''
+def launchMatcher(shout, station):
+    if shout['shortName']==station:
+        pushNotification(shout['launchDate'])
+
+'''
 Make a pushbullet notification
 '''
 def pushNotification(time):
-    payload = {'type':'note', 'title':'Lifeboat Launch', 'body':'Lifeboat Launched At '+time}
+    payload = {
+        'type':'push',
+        'channel_tag':'foweylifeboatunofficial',
+        'title':'Lifeboat Launch',
+        'body':'Lifeboat Launched At '+time}
+        'dissmissable': False,
     headers = {'Access-Token':os.environ['PB_KEY']}
     r=requests.post("https://api.pushbullet.com/v2/pushes", data=payload, headers=headers)
 
@@ -29,7 +41,7 @@ while True:
 
     for shoutString in differentShouts:
         shout = json.loads(shoutString)
-        pushNotification(shout['launchDate'])
+        launchMatcher(shout, "Fowey")
 
     with open('oldShouts.json', 'w') as oldShoutsFile:
         newShoutsList=[]
